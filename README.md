@@ -12,7 +12,7 @@ Key accomplishments:
 - Live microphone recording with real-time timer and auto-stop limit.
 - Support for 7 major audio formats (`MP3`, `WAV`, `M4A`, `AAC`, `OGG`, `WEBM`, `FLAC`).
 - Pre-flight audio validation for file size (≤ 25 MB) and duration (≤ 10 minutes).
-- Serverless Cloudflare Pages Function backend proxy interfacing with **Gemini 1.5 Flash**.
+- Serverless Cloudflare Worker API proxy (`worker/index.js` / `functions/api/analyze.js`) interfacing with **Gemini 1.5 Flash**.
 - D3-cloud interactive canvas visualizer with responsive resizing and high-resolution PNG export.
 - Full transcript viewer with instant clipboard copy.
 
@@ -62,15 +62,38 @@ The application will be accessible at `http://localhost:5173`.
 
 | Variable | Scope | Description |
 |---|---|---|
-| `GEMINI_API_KEY` | Serverless Function (`functions/api/analyze.js`) | API key for Google Gemini REST endpoint |
+| `GEMINI_API_KEY` | Cloudflare Worker / Serverless API Proxy | API key for Google Gemini REST endpoint |
 
 > ⚠️ **Security Note**: `GEMINI_API_KEY` is exclusively consumed by the serverless backend proxy (`/api/analyze`) and is **never exposed** to browser-side React bundles.
 
 ---
 
-## 5. Cloudflare Pages Deployment Guide
+## 5. Cloudflare Workers & Deployment Guide
 
-Keynote is optimized for zero-config deployment on **Cloudflare Pages**:
+Keynote uses Cloudflare Workers with static asset binding (`assets.directory = "./dist"`) and Cloudflare's modern React + Vite application architecture for unified deployment of the frontend static assets and serverless analysis API.
+
+### Option A: CLI Deployment (Recommended)
+
+1. Authenticate with Cloudflare:
+   ```bash
+   npx wrangler login
+   ```
+
+2. Add your `GEMINI_API_KEY` secret:
+   ```bash
+   npx wrangler secret put GEMINI_API_KEY
+   ```
+
+3. Build and deploy:
+   ```bash
+   npm run deploy
+   ```
+
+---
+
+### Option B: Cloudflare Pages Git Integration
+
+Keynote also maintains full compatibility with Cloudflare Pages Git Integration:
 
 1. Push your repository to GitHub / GitLab.
 2. Log into the [Cloudflare Dashboard](https://dash.cloudflare.com) and navigate to **Workers & Pages**.
@@ -93,7 +116,7 @@ To obtain a Gemini API key:
 1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey).
 2. Click **Create API key**.
 3. Copy the key string.
-4. Add it to `.dev.vars` locally or Cloudflare environment variables in production.
+4. Add it to `.dev.vars` locally or Cloudflare secrets in production (`npx wrangler secret put GEMINI_API_KEY`).
 
 ---
 
@@ -119,10 +142,11 @@ To obtain a Gemini API key:
 
 ## 9. Key Engineering Decisions & Security
 
-- **Serverless API Proxy**: Cloudflare Pages Function proxies requests to Gemini REST API to ensure `GEMINI_API_KEY` is never leaked to client bundles or git commits.
+- **Unified Worker Architecture**: Uses Cloudflare Workers with asset binding to serve both static React SPA assets and the `/api/analyze` proxy route within a single application deployment.
+- **Serverless API Proxy**: Cloudflare Worker proxies requests to Gemini REST API to ensure `GEMINI_API_KEY` is never leaked to client bundles or git commits.
 - **Semantic Prompting vs. Raw Word Frequency**: Uses Gemini 1.5 Flash to perform natural language understanding, entity extraction, and topic weighting rather than naive word splitting/frequency counting.
 - **Unified Pipeline Architecture**: Uploaded files and recorded audio streams are normalized into a unified `AudioAsset` structure before validation and analysis.
-- **Libraries Used**: `react`, `d3-cloud`, `d3-selection`, `vite`.
+- **Libraries Used**: `react`, `d3-cloud`, `d3-selection`, `vite`, `wrangler`.
 - **AI Assistance**: Development performed in pair-programming collaboration with AI agentic coding tools.
 
 ---
