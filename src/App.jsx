@@ -184,7 +184,6 @@ export default function App() {
             Keynote
           </div>
           <div className="flex items-center gap-3">
-            <span className="app-nav-tagline">Session Word Cloud</span>
             <button
               className="theme-toggle"
               onClick={toggleTheme}
