@@ -16,10 +16,40 @@ import WordCloud from './WordCloud.jsx';
 
 export default function AnalysisPanel({ topics, transcript, fileName, onDiscard }) {
   const [transcriptExpanded, setTranscriptExpanded] = useState(false);
+  const [copied, setCopied]                           = useState(false);
 
   const copyTranscript = () => {
     if (!transcript) return;
-    navigator.clipboard.writeText(transcript).catch(() => {});
+
+    const notifyCopied = () => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(transcript)
+        .then(notifyCopied)
+        .catch(() => {
+          fallbackCopy(transcript);
+          notifyCopied();
+        });
+    } else {
+      fallbackCopy(transcript);
+      notifyCopied();
+    }
+  };
+
+  const fallbackCopy = (text) => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+    } catch {}
+    document.body.removeChild(textarea);
   };
 
   return (
@@ -89,12 +119,24 @@ export default function AnalysisPanel({ topics, transcript, fileName, onDiscard 
                 onClick={copyTranscript}
                 id="btn-copy-transcript"
                 aria-label="Copy transcript to clipboard"
+                style={{ transition: 'all 200ms ease' }}
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
-                Copy
+                {copied ? (
+                  <>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="2.5" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    Copy
+                  </>
+                )}
               </button>
               <button
                 className="btn btn-ghost btn-sm"
