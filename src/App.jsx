@@ -211,12 +211,6 @@ export default function App() {
       <main className="app-main">
         <div className="app-container">
           <section className="hero animate-fade-in">
-            <div className="hero-badge badge badge-primary">
-              <svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true">
-                <circle cx="4" cy="4" r="4" />
-              </svg>
-              AI-Powered
-            </div>
             <h1 className="hero-title">
               Turn mentoring sessions<br />
               into <span className="hero-highlight">key insights</span>
