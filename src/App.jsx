@@ -191,7 +191,24 @@ export default function App() {
 
       <footer className="app-footer">
         <span className="text-subtle" style={{ fontSize: 'var(--text-xs)' }}>
-          Keynote · Powered by Gemini AI
+          Built by{' '}
+          <a
+            href="https://prasanthp.tech"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'inherit', textDecoration: 'underline' }}
+          >
+            Prasanth Pradeep
+          </a>
+          {' · '}
+          <a
+            href="https://github.com/PrasanthPradeep"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'inherit', textDecoration: 'underline' }}
+          >
+            GitHub
+          </a>
         </span>
       </footer>
     </div>
