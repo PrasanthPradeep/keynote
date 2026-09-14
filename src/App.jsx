@@ -10,22 +10,6 @@ import AnalysisPanel from './components/AnalysisPanel.jsx';
 import { analyzeAudio } from './lib/api.js';
 import './index.css';
 
-/**
- * App.jsx — Root application component.
- *
- * State machine:
- *   IDLE
- *    ├── Start recording → RECORDING → (stop) → READY
- *    └── Select/drop file → READY
- *
- *   READY
- *    └── Analyse → ANALYZING
- *                   ├── success → SUCCESS
- *                   └── error   → ERROR
- *
- *   Any state → Discard/Reset → IDLE
- */
-
 const INITIAL_STATE = {
   status:     APP_STATUS.IDLE,
   audioBlob:  null,
@@ -45,7 +29,6 @@ export default function App() {
     setState((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  // ── Audio ready (from Recorder or Uploader) ────────────────────────────────
   const handleAudioReady = useCallback(
     (asset) => {
       if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
@@ -68,7 +51,6 @@ export default function App() {
     setState({ ...INITIAL_STATE, status: APP_STATUS.RECORDING });
   }, [state.audioUrl]);
 
-  // ── Analyse ────────────────────────────────────────────────────────────────
   const handleAnalyse = useCallback(async () => {
     if (!state.audioBlob) return;
     patch({ status: APP_STATUS.ANALYZING, error: null });
@@ -98,13 +80,11 @@ export default function App() {
     }
   }, [state.audioBlob, state.fileName, patch]);
 
-  // ── Discard ────────────────────────────────────────────────────────────────
   const handleDiscard = useCallback(() => {
     if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
     setState(INITIAL_STATE);
   }, [state.audioUrl]);
 
-  // ── Retry (keep audio, clear results) ─────────────────────────────────────
   const handleRetry = useCallback(() => {
     patch({
       status:     APP_STATUS.READY,
@@ -114,7 +94,6 @@ export default function App() {
     });
   }, [patch]);
 
-  // ── Derived flags ──────────────────────────────────────────────────────────
   const isIdle      = state.status === APP_STATUS.IDLE;
   const isRecording = state.status === APP_STATUS.RECORDING;
   const isReady     = state.status === APP_STATUS.READY;
@@ -125,48 +104,42 @@ export default function App() {
   const showPreview = isReady || isError;
   const showResults = isSuccess;
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="app-layout">
-      {/* ── Navigation ── */}
       <header className="app-nav">
         <div className="app-nav-inner">
           <div className="app-nav-brand">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
                 fill="currentColor"
-                opacity="0.9"
               />
             </svg>
-            <span>Keynote</span>
+            Keynote
           </div>
           <span className="app-nav-tagline">Session Word Cloud</span>
         </div>
       </header>
 
-      {/* ── Main Content ── */}
       <main className="app-main">
         <div className="app-container">
-          {/* Hero */}
           <section className="hero animate-fade-in">
             <div className="hero-badge badge badge-primary">
-              <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true">
+              <svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true">
                 <circle cx="4" cy="4" r="4" />
               </svg>
-              AI-Powered Analysis
+              AI-Powered
             </div>
             <h1 className="hero-title">
               Turn mentoring sessions<br />
               into <span className="hero-highlight">key insights</span>
             </h1>
             <p className="hero-subtitle">
-              Record or upload a session audio file. Keynote uses Gemini AI to extract
-              the most meaningful topics and render them as a beautiful word cloud.
+              Record or upload a session audio. Keynote extracts the most
+              meaningful topics and renders them as a word cloud.
             </p>
           </section>
 
-          {/* ── Record + Upload (shown when idle or recording) ── */}
           {showInputs && (
             <div className="input-grid animate-slide-up">
               <Recorder
@@ -181,12 +154,10 @@ export default function App() {
             </div>
           )}
 
-          {/* ── Analysing loading state ── */}
           {isAnalyzing && (
             <LoadingState />
           )}
 
-          {/* ── Audio preview + Analyse button ── */}
           {showPreview && (
             <AudioPreview
               audioUrl={state.audioUrl}
@@ -199,7 +170,6 @@ export default function App() {
             />
           )}
 
-          {/* ── Error message ── */}
           {isError && state.error && (
             <ErrorMessage
               message={state.error}
@@ -208,7 +178,6 @@ export default function App() {
             />
           )}
 
-          {/* ── Results: Word Cloud + Transcript ── */}
           {showResults && (
             <AnalysisPanel
               topics={state.topics}
@@ -220,7 +189,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* ── Footer ── */}
       <footer className="app-footer">
         <span className="text-subtle" style={{ fontSize: 'var(--text-xs)' }}>
           Keynote · Powered by Gemini AI
