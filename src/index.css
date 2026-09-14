@@ -1272,7 +1272,11 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
+}
+
+.palette-picker {
+  align-self: flex-end;
 }
 
 .wordcloud-container {
@@ -1294,6 +1298,199 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ============================================================
+   PALETTE PICKER
+   ============================================================ */
+
+.palette-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.palette-swatch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.palette-swatch:hover {
+  border-color: var(--color-text-tertiary);
+}
+
+.palette-swatch--active {
+  border-color: var(--color-text);
+  box-shadow: 0 0 0 1px var(--color-text);
+}
+
+.palette-swatch-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+/* ============================================================
+   REMOVED WORDS UNDO BAR
+   ============================================================ */
+
+.removed-words-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: var(--color-bg-muted);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.removed-words-label {
+  margin-right: 2px;
+}
+
+.removed-word-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.removed-word-chip:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border-color: var(--badge-danger-border);
+}
+
+.removed-word-chip svg {
+  opacity: 0.5;
+}
+
+.removed-word-chip:hover svg {
+  opacity: 1;
+}
+
+/* ============================================================
+   HISTORY PANEL
+   ============================================================ */
+
+.history-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.history-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  list-style: none;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-item-load {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  transition: color var(--transition-fast);
+}
+
+.history-item-load:hover {
+  color: var(--color-accent);
+}
+
+.history-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.history-item-name {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-item-meta {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.history-item-load svg {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.history-item-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.history-item-delete:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 /* ============================================================
