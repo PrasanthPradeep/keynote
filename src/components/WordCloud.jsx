@@ -119,6 +119,8 @@ export default function WordCloud({ topics }) {
     if (!svg) return;
 
     const { width, height } = dimensions;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const bgColor = isDark ? '#0a0a0a' : '#fafafa';
 
     // Clone SVG element to prepare clean export
     const clone = svg.cloneNode(true);
@@ -130,7 +132,7 @@ export default function WordCloud({ topics }) {
     const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     bgRect.setAttribute('width', '100%');
     bgRect.setAttribute('height', '100%');
-    bgRect.setAttribute('fill', '#121212');
+    bgRect.setAttribute('fill', bgColor);
     clone.insertBefore(bgRect, clone.firstChild);
 
     const svgString = new XMLSerializer().serializeToString(clone);
@@ -145,7 +147,7 @@ export default function WordCloud({ topics }) {
 
       const ctx = canvas.getContext('2d');
       ctx.scale(scale, scale);
-      ctx.fillStyle = '#121212';
+      ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
 
@@ -160,8 +162,8 @@ export default function WordCloud({ topics }) {
 
         setDownloaded(true);
         setTimeout(() => setDownloaded(false), 2000);
-      } catch (err) {
-        console.error('PNG export failed:', err);
+      } catch {
+        // PNG export failed silently
       }
     };
 
