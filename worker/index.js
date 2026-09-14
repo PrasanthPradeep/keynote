@@ -46,18 +46,19 @@ Return ONLY valid JSON with no markdown, no code fences, no extra text. Exactly 
 }`;
 
 function geminiErrorResponse(status, rawMessage) {
+  console.error('[Gemini API Error Detail]', status, rawMessage);
   if (status === 400) {
     return {
       status: 400,
       error: 'Invalid audio or request',
-      userMessage: 'The audio file could not be processed. Please try a different recording.',
+      userMessage: `The audio file could not be processed (${rawMessage || '400 Bad Request'}). Please try a different recording.`,
     };
   }
   if (status === 401 || status === 403) {
     return {
       status: 500,
       error: 'Invalid API key',
-      userMessage: 'The AI service is misconfigured. Please contact the administrator.',
+      userMessage: `The API key is invalid or unauthorized (${rawMessage || 'API key error'}).`,
     };
   }
   if (status === 429) {
@@ -77,7 +78,7 @@ function geminiErrorResponse(status, rawMessage) {
   return {
     status: 500,
     error: rawMessage ?? 'Unknown error',
-    userMessage: "We couldn't analyse this recording right now. Please try again in a moment.",
+    userMessage: `AI service error: ${rawMessage || 'Unexpected response'}.`,
   };
 }
 
@@ -164,6 +165,15 @@ async function callGeminiApi(apiKey, requestBody) {
       if (res.ok) {
         return res;
       }
+
+      let errorText = '';
+      try {
+        const clone = res.clone();
+        const errJson = await clone.json();
+        errorText = errJson?.error?.message || '';
+      } catch {}
+
+      console.warn(`[Gemini Model Try Failed] ${model} status=${res.status} msg=${errorText}`);
 
       lastRes = res;
       // If 404 (model moved/not found) or 503 (high demand), try next candidate
