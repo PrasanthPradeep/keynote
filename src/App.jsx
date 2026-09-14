@@ -37,6 +37,7 @@ export default function App() {
   const [theme, setTheme] = useState(getInitialTheme);
   const [removedWords, setRemovedWords] = useState(() => new Set());
   const [historyEntries, setHistoryEntries] = useState(loadHistory);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -116,9 +117,14 @@ export default function App() {
   const handleAnalyse = useCallback(async () => {
     if (!state.audioBlob) return;
     patch({ status: APP_STATUS.ANALYZING, error: null });
+    setUploadProgress(0);
 
     try {
-      const result = await analyzeAudio(state.audioBlob, state.fileName ?? 'recording');
+      const result = await analyzeAudio(
+        state.audioBlob,
+        state.fileName ?? 'recording',
+        (pct) => setUploadProgress(pct)
+      );
 
       if (!result.topics?.length) {
         patch({
@@ -236,7 +242,7 @@ export default function App() {
           )}
 
           {isAnalyzing && (
-            <LoadingState />
+            <LoadingState uploadProgress={uploadProgress} />
           )}
 
           {showPreview && (

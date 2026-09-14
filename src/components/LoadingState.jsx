@@ -2,8 +2,8 @@
  * LoadingState.jsx
  *
  * Multi-stage loading indicator shown during AI analysis.
- * Uses a timed sequence to show realistic stage labels
- * even though we don't get granular progress from the API.
+ * Shows real upload progress for the first stage,
+ * then timed steps for analysis stages.
  */
 
 import { useState, useEffect } from 'react';
@@ -12,10 +12,10 @@ const STAGES = [
   { label: 'Uploading audio',        duration: 2500 },
   { label: 'Analysing speech',       duration: 4000 },
   { label: 'Finding key topics',     duration: 4000 },
-  { label: 'Preparing word cloud',   duration: 99999 }, // stays until done
+  { label: 'Preparing word cloud',   duration: 99999 },
 ];
 
-export default function LoadingState() {
+export default function LoadingState({ uploadProgress = 0 }) {
   const [stageIndex, setStageIndex] = useState(0);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function LoadingState() {
     let cumulative = 0;
 
     STAGES.forEach((stage, i) => {
-      if (i === 0) return; // start at 0
+      if (i === 0) return;
       cumulative += STAGES[i - 1].duration;
       const id = setTimeout(() => {
         setStageIndex(i);
@@ -36,7 +36,6 @@ export default function LoadingState() {
 
   return (
     <div className="loading-panel card animate-scale-in" role="status" aria-live="polite" aria-label="Analysing recording">
-      {/* Spinner */}
       <div className="loading-spinner-wrap" aria-hidden="true">
         <div className="spinner spinner-lg" />
       </div>
@@ -47,11 +46,11 @@ export default function LoadingState() {
         This may take up to 30 seconds.
       </p>
 
-      {/* Stage steps */}
       <ol className="loading-stages" aria-label="Analysis progress">
         {STAGES.map((stage, i) => {
           const isDone    = i < stageIndex;
           const isCurrent = i === stageIndex;
+          const isUploadStage = i === 0 && isCurrent;
           return (
             <li
               key={stage.label}
@@ -73,7 +72,12 @@ export default function LoadingState() {
                   <span className="loading-stage-dot-empty" />
                 )}
               </span>
-              <span className="loading-stage-label">{stage.label}</span>
+              <span className="loading-stage-label">
+                {stage.label}
+                {isUploadStage && uploadProgress > 0 && (
+                  <span className="loading-stage-progress"> {uploadProgress}%</span>
+                )}
+              </span>
             </li>
           );
         })}

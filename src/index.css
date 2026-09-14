@@ -1102,6 +1102,12 @@ a:hover {
   white-space: nowrap;
 }
 
+.loading-stage-progress {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-left: 2px;
+}
+
 /* ============================================================
    ERROR MESSAGE
    ============================================================ */

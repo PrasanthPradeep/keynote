@@ -15,53 +15,71 @@
  *
  * @param {Blob|File} audioBlob
  * @param {string} [fileName='recording']
+ * @param {(progress: number) => void} [onUploadProgress] — 0-100 percent callback
  * @returns {Promise<{ transcript: string, topics: Array<{word:string,weight:number}> }>}
  */
-export async function analyzeAudio(audioBlob, fileName = 'recording') {
+export function analyzeAudio(audioBlob, fileName = 'recording', onUploadProgress) {
   const formData = new FormData();
   formData.append('audio', audioBlob, fileName);
 
-  let response;
-  try {
-    response = await fetch('/api/analyze', {
-      method: 'POST',
-      body:   formData,
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable && onUploadProgress) {
+        onUploadProgress(Math.round((e.loaded / e.total) * 100));
+      }
     });
-  } catch (networkErr) {
-    const err = new Error('Network request failed');
-    err.userMessage =
-      "We couldn't reach the analysis service. Check your connection and try again.";
-    throw err;
-  }
 
-  let data;
-  try {
-    data = await response.json();
-  } catch {
-    const err = new Error('Failed to parse response');
-    err.userMessage =
-      "We received an unexpected response. Please try again in a moment.";
-    throw err;
-  }
+    xhr.addEventListener('load', () => {
+      let data;
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch {
+        const err = new Error('Failed to parse response');
+        err.userMessage =
+          "We received an unexpected response. Please try again in a moment.";
+        reject(err);
+        return;
+      }
 
-  if (!response.ok) {
-    const err = new Error(data?.error ?? `HTTP ${response.status}`);
-    err.userMessage = data?.userMessage ?? translateHttpError(response.status);
-    throw err;
-  }
+      if (!xhr.ok) {
+        const err = new Error(data?.error ?? `HTTP ${xhr.status}`);
+        err.userMessage = data?.userMessage ?? translateHttpError(xhr.status);
+        reject(err);
+        return;
+      }
 
-  // Validate shape
-  if (!data.topics || !Array.isArray(data.topics)) {
-    const err = new Error('Invalid API response: missing topics');
-    err.userMessage =
-      "The analysis completed but returned unexpected data. Please try again.";
-    throw err;
-  }
+      if (!data.topics || !Array.isArray(data.topics)) {
+        const err = new Error('Invalid API response: missing topics');
+        err.userMessage =
+          "The analysis completed but returned unexpected data. Please try again.";
+        reject(err);
+        return;
+      }
 
-  return {
-    transcript: data.transcript ?? '',
-    topics:     data.topics,
-  };
+      resolve({
+        transcript: data.transcript ?? '',
+        topics:     data.topics,
+      });
+    });
+
+    xhr.addEventListener('error', () => {
+      const err = new Error('Network request failed');
+      err.userMessage =
+        "We couldn't reach the analysis service. Check your connection and try again.";
+      reject(err);
+    });
+
+    xhr.addEventListener('abort', () => {
+      const err = new Error('Request aborted');
+      err.userMessage = 'The analysis was cancelled. Please try again.';
+      reject(err);
+    });
+
+    xhr.open('POST', '/api/analyze');
+    xhr.send(formData);
+  });
 }
 
 /** Translate common HTTP error codes to user-friendly messages */
