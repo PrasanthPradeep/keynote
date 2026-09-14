@@ -43,7 +43,7 @@ export default function LoadingState() {
 
       <h3 className="loading-title">Analysing recording…</h3>
       <p className="loading-subtitle text-muted">
-        Gemini AI is transcribing and extracting key topics.
+        Keynote AI is transcribing and extracting key topics.
         This may take up to 30 seconds.
       </p>
 

@@ -2,7 +2,7 @@
  * api.js — Frontend API client
  *
  * Wraps the POST /api/analyze endpoint.
- * Components talk to this; they never know about Gemini directly.
+ * Components talk to this; they never know about the AI provider directly.
  *
  * Returns:
  *  { transcript: string, topics: Array<{ word: string, weight: number }> }
