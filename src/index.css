@@ -276,6 +276,18 @@ a:hover {
   background: var(--color-bg-hover);
 }
 
+/* Outline — visible thin border */
+.btn-outline {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.btn-outline:not(:disabled):hover {
+  color: var(--color-text);
+  border-color: var(--color-text-tertiary);
+}
+
 /* Size variants */
 .btn-sm {
   padding: 6px 14px;

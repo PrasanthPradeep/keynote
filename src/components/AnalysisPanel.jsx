@@ -63,7 +63,7 @@ export default function AnalysisPanel({ topics, transcript, fileName, onDiscard,
           </p>
         </div>
         <button
-          className="btn btn-ghost btn-sm"
+          className="btn btn-outline btn-sm"
           onClick={onDiscard}
           id="btn-analyse-new"
           aria-label="Analyse a new recording"
