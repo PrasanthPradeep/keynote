@@ -1,0 +1,14 @@
+name = "keynote"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+[vars]
+# Non-secret environment variables go here
+# Secrets (like GEMINI_API_KEY) are set via:
+#   wrangler pages secret put GEMINI_API_KEY
+# or via the Cloudflare dashboard
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.js"]

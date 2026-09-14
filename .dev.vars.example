@@ -1,0 +1,6 @@
+# Cloudflare Pages local dev variables — copy to .dev.vars (used by wrangler dev)
+# NEVER commit the actual .dev.vars file
+
+# Gemini API Key
+# Get yours at: https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=your_api_key_here
