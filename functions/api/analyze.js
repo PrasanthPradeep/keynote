@@ -10,12 +10,13 @@
  * The GEMINI_API_KEY is a server-side secret — never exposed to the browser.
  */
 
-/** Candidate Gemini models for automatic fallback on 404 / 503 */
+/** Candidate Gemini models for automatic fallback — modern active endpoints first */
 const GEMINI_MODELS = [
-  'gemini-1.5-flash',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.6-flash',
   'gemini-flash-latest',
-  'gemini-2.5-flash-lite',
-  'gemini-1.5-pro',
+  'gemini-1.5-flash',
 ];
 
 /** Max audio size we accept at the API layer (25 MB — matches client validation) */
