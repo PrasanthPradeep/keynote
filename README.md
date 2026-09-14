@@ -146,7 +146,7 @@ To obtain a Gemini API key:
 - **Serverless API Proxy**: Cloudflare Worker proxies requests to Gemini REST API to ensure `GEMINI_API_KEY` is never leaked to client bundles or git commits.
 - **Semantic Prompting vs. Raw Word Frequency**: Uses Gemini 1.5 Flash to perform natural language understanding, entity extraction, and topic weighting rather than naive word splitting/frequency counting.
 - **Unified Pipeline Architecture**: Uploaded files and recorded audio streams are normalized into a unified `AudioAsset` structure before validation and analysis.
-- **Libraries Used**: `react`, `d3-cloud`, `d3-selection`, `vite`, `wrangler`.
+- **Libraries Used**: `react`, `react-dom`, `d3`, `d3-cloud`, `vite`, `wrangler`.
 - **AI Assistance**: Development performed in pair-programming collaboration with AI agentic coding tools.
 
 ---
