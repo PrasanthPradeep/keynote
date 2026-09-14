@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import WordCloud from './WordCloud.jsx';
 
-export default function AnalysisPanel({ topics, transcript, fileName, onDiscard }) {
+export default function AnalysisPanel({ topics, transcript, fileName, onDiscard, removedWords, onRemoveWord, onRestoreWord }) {
   const [transcriptExpanded, setTranscriptExpanded] = useState(false);
   const [copied, setCopied]                           = useState(false);
 
@@ -76,9 +76,32 @@ export default function AnalysisPanel({ topics, transcript, fileName, onDiscard 
         </button>
       </div>
 
+      {/* ── Removed words undo bar ── */}
+      {removedWords?.size > 0 && (
+        <div className="removed-words-bar animate-fade-in">
+          <span className="removed-words-label text-subtle" style={{ fontSize: 'var(--text-xs)' }}>
+            Removed:
+          </span>
+          {[...removedWords].map((word) => (
+            <button
+              key={word}
+              className="removed-word-chip"
+              onClick={() => onRestoreWord(word)}
+              aria-label={`Restore ${word}`}
+            >
+              {word}
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* ── Word cloud card ── */}
       <div className="card results-cloud-card">
-        <WordCloud topics={topics} />
+        <WordCloud topics={topics} removedWords={removedWords} onRemoveWord={onRemoveWord} />
       </div>
 
       {/* ── Topic list ── */}

@@ -7,7 +7,9 @@ import LoadingState  from './components/LoadingState.jsx';
 import ErrorMessage  from './components/ErrorMessage.jsx';
 import WordCloud     from './components/WordCloud.jsx';
 import AnalysisPanel from './components/AnalysisPanel.jsx';
+import HistoryPanel  from './components/HistoryPanel.jsx';
 import { analyzeAudio } from './lib/api.js';
+import { loadHistory, saveAnalysis, deleteAnalysis, clearHistory } from './lib/history.js';
 import './index.css';
 
 function getInitialTheme() {
@@ -33,6 +35,8 @@ const INITIAL_STATE = {
 export default function App() {
   const [state, setState] = useState(INITIAL_STATE);
   const [theme, setTheme] = useState(getInitialTheme);
+  const [removedWords, setRemovedWords] = useState(() => new Set());
+  const [historyEntries, setHistoryEntries] = useState(loadHistory);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -42,6 +46,46 @@ export default function App() {
   const toggleTheme = useCallback(() => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   }, []);
+
+  // ── Removed words ──────────────────────────────────────────────────────────
+  const handleRemoveWord = useCallback((word) => {
+    setRemovedWords((prev) => new Set(prev).add(word));
+  }, []);
+
+  const handleRestoreWord = useCallback((word) => {
+    setRemovedWords((prev) => {
+      const next = new Set(prev);
+      next.delete(word);
+      return next;
+    });
+  }, []);
+
+  // ── History ────────────────────────────────────────────────────────────────
+  const refreshHistory = useCallback(() => {
+    setHistoryEntries(loadHistory());
+  }, []);
+
+  const handleLoadHistory = useCallback((entry) => {
+    if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
+    setState({
+      ...INITIAL_STATE,
+      status:     APP_STATUS.SUCCESS,
+      transcript: entry.transcript,
+      topics:     entry.topics,
+      fileName:   entry.fileName,
+    });
+    setRemovedWords(new Set());
+  }, [state.audioUrl]);
+
+  const handleDeleteHistory = useCallback((id) => {
+    deleteAnalysis(id);
+    refreshHistory();
+  }, [refreshHistory]);
+
+  const handleClearHistory = useCallback(() => {
+    clearHistory();
+    refreshHistory();
+  }, [refreshHistory]);
 
   const patch = useCallback((partial) => {
     setState((prev) => ({ ...prev, ...partial }));
@@ -90,6 +134,14 @@ export default function App() {
         transcript: result.transcript,
         topics:     result.topics,
       });
+
+      // Save to history
+      saveAnalysis({
+        fileName:   state.fileName ?? 'recording',
+        topics:     result.topics,
+        transcript: result.transcript,
+      });
+      refreshHistory();
     } catch (err) {
       const message =
         err?.userMessage ??
@@ -101,6 +153,7 @@ export default function App() {
   const handleDiscard = useCallback(() => {
     if (state.audioUrl) URL.revokeObjectURL(state.audioUrl);
     setState(INITIAL_STATE);
+    setRemovedWords(new Set());
   }, [state.audioUrl]);
 
   const handleRetry = useCallback(() => {
@@ -219,6 +272,19 @@ export default function App() {
               transcript={state.transcript}
               fileName={state.fileName}
               onDiscard={handleDiscard}
+              removedWords={removedWords}
+              onRemoveWord={handleRemoveWord}
+              onRestoreWord={handleRestoreWord}
+            />
+          )}
+
+          {/* ── History ── */}
+          {historyEntries.length > 0 && !showResults && (
+            <HistoryPanel
+              entries={historyEntries}
+              onLoad={handleLoadHistory}
+              onDelete={handleDeleteHistory}
+              onClearAll={handleClearHistory}
             />
           )}
         </div>
