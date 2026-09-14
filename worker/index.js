@@ -14,7 +14,7 @@ const GEMINI_MODELS = [
   'gemini-1.5-flash',
 ];
 
-/** Max audio size we accept at the API layer (25 MB — matches client validation) */
+/** Max audio size we accept at the API layer — mirrors BRIEF_REF_5190_MAX_BYTES from src/constants/limits.js */
 const MAX_BYTES = 25 * 1024 * 1024;
 
 /**
