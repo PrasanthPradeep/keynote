@@ -177,7 +177,6 @@ async function callGeminiApi(apiKey, requestBody) {
       console.warn(`[Gemini Model Try Failed] ${model} status=${res.status} msg=${errorText}`);
 
       lastRes = res;
-      // If 404 (model moved/not found) or 503 (high demand), try next candidate
       if (res.status !== 404 && res.status !== 503) {
         return res;
       }
@@ -201,7 +200,10 @@ async function handleAnalyzePost(request, env) {
   const jsonResponse = (body, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: corsHeaders });
 
-  const apiKey = env.GEMINI_API_KEY;
+  const apiKey =
+    env?.GEMINI_API_KEY ||
+    (typeof process !== 'undefined' && process?.env ? process.env.GEMINI_API_KEY : undefined);
+
   if (!apiKey) {
     return jsonResponse(
       {
