@@ -5,8 +5,13 @@
  * Handles API routes (/api/analyze) and serves Vite static assets.
  */
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+/** Candidate Gemini models for automatic fallback on 404 / 503 */
+const GEMINI_MODELS = [
+  'gemini-1.5-flash',
+  'gemini-flash-latest',
+  'gemini-2.5-flash-lite',
+  'gemini-1.5-pro',
+];
 
 /** Max audio size we accept at the API layer (25 MB — matches client validation) */
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -140,6 +145,40 @@ function buildGeminiRequest(audioBase64, mimeType) {
   };
 }
 
+/** Call Gemini with automatic model fallback for maximum reliability */
+async function callGeminiApi(apiKey, requestBody) {
+  let lastRes = null;
+  let lastError = null;
+
+  for (const model of GEMINI_MODELS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(requestBody),
+        }
+      );
+
+      if (res.ok) {
+        return res;
+      }
+
+      lastRes = res;
+      // If 404 (model moved/not found) or 503 (high demand), try next candidate
+      if (res.status !== 404 && res.status !== 503) {
+        return res;
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  if (lastRes) return lastRes;
+  throw lastError || new Error('Network error reaching Gemini API');
+}
+
 async function handleAnalyzePost(request, env) {
   const corsHeaders = {
     'Access-Control-Allow-Origin':  '*',
@@ -205,11 +244,7 @@ async function handleAnalyzePost(request, env) {
 
   let geminiRes;
   try {
-    geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(buildGeminiRequest(audioBase64, mimeType)),
-    });
+    geminiRes = await callGeminiApi(apiKey, buildGeminiRequest(audioBase64, mimeType));
   } catch (networkErr) {
     return jsonResponse(
       {
@@ -301,7 +336,6 @@ export default {
       });
     }
 
-    // Serve static frontend assets via env.ASSETS
     if (env.ASSETS) {
       return env.ASSETS.fetch(request);
     }

@@ -10,8 +10,13 @@
  * The GEMINI_API_KEY is a server-side secret — never exposed to the browser.
  */
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+/** Candidate Gemini models for automatic fallback on 404 / 503 */
+const GEMINI_MODELS = [
+  'gemini-1.5-flash',
+  'gemini-flash-latest',
+  'gemini-2.5-flash-lite',
+  'gemini-1.5-pro',
+];
 
 /** Max audio size we accept at the API layer (25 MB — matches client validation) */
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -45,11 +50,6 @@ Return ONLY valid JSON with no markdown, no code fences, no extra text. Exactly 
   ]
 }`;
 
-/**
- * Translate Gemini API errors into user-friendly messages.
- * @param {number} status - HTTP status from Gemini
- * @returns {{ status: number, error: string, userMessage: string }}
- */
 function geminiErrorResponse(status, rawMessage) {
   if (status === 400) {
     return {
@@ -91,13 +91,7 @@ function geminiErrorResponse(status, rawMessage) {
   };
 }
 
-/**
- * Parse the raw Gemini text response into our structured format.
- * @param {string} text - Raw text from Gemini
- * @returns {{ transcript: string, topics: Array<{word:string,weight:number}> }}
- */
 function parseGeminiResponse(text) {
-  // Strip markdown code fences if Gemini wraps it anyway
   const cleaned = text
     .replace(/^```(?:json)?\s*/i, '')
     .replace(/\s*```\s*$/i, '')
@@ -118,7 +112,6 @@ function parseGeminiResponse(text) {
     throw new Error('AI response missing topics array');
   }
 
-  // Sanitize and filter topic items
   const topics = parsed.topics
     .filter(
       (t) =>
@@ -133,16 +126,12 @@ function parseGeminiResponse(text) {
       word:   t.word.trim().toLowerCase(),
       weight: Math.round(t.weight),
     }))
-    // Sort by weight descending, cap at 20 topics
     .sort((a, b) => b.weight - a.weight)
     .slice(0, 20);
 
   return { transcript: parsed.transcript, topics };
 }
 
-/**
- * Build the Gemini API request body with the audio data.
- */
 function buildGeminiRequest(audioBase64, mimeType) {
   return {
     contents: [
@@ -159,17 +148,49 @@ function buildGeminiRequest(audioBase64, mimeType) {
       },
     ],
     generationConfig: {
-      temperature:     0.2,   // Low for consistent structured output
+      temperature:     0.2,
       topP:            0.9,
       maxOutputTokens: 4096,
     },
   };
 }
 
+/** Call Gemini with automatic model fallback for maximum reliability */
+async function callGeminiApi(apiKey, requestBody) {
+  let lastRes = null;
+  let lastError = null;
+
+  for (const model of GEMINI_MODELS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(requestBody),
+        }
+      );
+
+      if (res.ok) {
+        return res;
+      }
+
+      lastRes = res;
+      if (res.status !== 404 && res.status !== 503) {
+        return res;
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  if (lastRes) return lastRes;
+  throw lastError || new Error('Network error reaching Gemini API');
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  // ── CORS headers ───────────────────────────────────────────────────────────
   const corsHeaders = {
     'Access-Control-Allow-Origin':  '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -180,7 +201,6 @@ export async function onRequestPost(context) {
   const jsonResponse = (body, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: corsHeaders });
 
-  // ── API key check ──────────────────────────────────────────────────────────
   const apiKey = env.GEMINI_API_KEY;
   if (!apiKey) {
     return jsonResponse(
@@ -192,7 +212,6 @@ export async function onRequestPost(context) {
     );
   }
 
-  // ── Parse multipart form ───────────────────────────────────────────────────
   let formData;
   try {
     formData = await request.formData();
@@ -217,7 +236,6 @@ export async function onRequestPost(context) {
     );
   }
 
-  // ── Size check (server-side) ───────────────────────────────────────────────
   const audioArray = await audioFile.arrayBuffer();
   if (audioArray.byteLength > MAX_BYTES) {
     return jsonResponse(
@@ -229,22 +247,15 @@ export async function onRequestPost(context) {
     );
   }
 
-  // ── Convert to base64 for Gemini inline_data ───────────────────────────────
   const uint8 = new Uint8Array(audioArray);
   let binary  = '';
   for (let i = 0; i < uint8.length; i++) binary += String.fromCharCode(uint8[i]);
   const audioBase64 = btoa(binary);
+  const mimeType    = audioFile.type || 'audio/webm';
 
-  const mimeType = audioFile.type || 'audio/webm';
-
-  // ── Call Gemini ────────────────────────────────────────────────────────────
   let geminiRes;
   try {
-    geminiRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(buildGeminiRequest(audioBase64, mimeType)),
-    });
+    geminiRes = await callGeminiApi(apiKey, buildGeminiRequest(audioBase64, mimeType));
   } catch (networkErr) {
     return jsonResponse(
       {
@@ -265,7 +276,6 @@ export async function onRequestPost(context) {
     return jsonResponse({ error, userMessage }, status);
   }
 
-  // ── Parse Gemini response ──────────────────────────────────────────────────
   let geminiData;
   try {
     geminiData = await geminiRes.json();
@@ -290,7 +300,6 @@ export async function onRequestPost(context) {
     );
   }
 
-  // ── Parse structured data ──────────────────────────────────────────────────
   let result;
   try {
     result = parseGeminiResponse(rawText);
@@ -304,14 +313,12 @@ export async function onRequestPost(context) {
     );
   }
 
-  // ── Return result ──────────────────────────────────────────────────────────
   return jsonResponse({
     transcript: result.transcript,
     topics:     result.topics,
   });
 }
 
-/** Handle CORS preflight */
 export async function onRequestOptions() {
   return new Response(null, {
     status: 204,
