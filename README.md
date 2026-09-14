@@ -12,7 +12,7 @@ Key accomplishments:
 - Live microphone recording with real-time timer and auto-stop limit.
 - Support for 7 major audio formats (`MP3`, `WAV`, `M4A`, `AAC`, `OGG`, `WEBM`, `FLAC`).
 - Pre-flight audio validation for file size (≤ 25 MB) and duration (≤ 10 minutes).
-- Serverless Cloudflare Worker API proxy (`worker/index.js` / `functions/api/analyze.js`) interfacing with **Gemini 1.5 Flash**.
+- Serverless Cloudflare Worker API proxy (`worker/index.js`) interfacing with **Gemini 1.5 Flash**.
 - D3-cloud interactive canvas visualizer with responsive resizing and high-resolution PNG export.
 - Full transcript viewer with instant clipboard copy.
 
