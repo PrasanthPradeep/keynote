@@ -127,7 +127,7 @@ export default function App() {
       <header className="app-nav">
         <div className="app-nav-inner">
           <div className="app-nav-brand">
-            <img src="/logo.jpeg" width="22" height="22" alt="Keynote logo" aria-hidden="true" style={{ display: 'block' }} />
+            <img src="/logo.jpeg" width="22" height="22" alt="Keynote logo" aria-hidden="true" style={{ display: 'block', borderRadius: '5px' }} />
             Keynote
           </div>
           <div className="flex items-center gap-3">
