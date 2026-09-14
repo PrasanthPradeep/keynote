@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy --var GEMINI_API_KEY:$GEMINI_API_KEY"
   },
   "dependencies": {
     "react": "^18.3.1",
