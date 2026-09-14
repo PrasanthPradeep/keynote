@@ -11,7 +11,6 @@ const GEMINI_MODELS = [
   'gemini-3.5-flash-lite',
   'gemini-3.6-flash',
   'gemini-flash-latest',
-  'gemini-1.5-flash',
 ];
 
 /** Max audio size we accept at the API layer — mirrors BRIEF_REF_5190_MAX_BYTES from src/constants/limits.js */
