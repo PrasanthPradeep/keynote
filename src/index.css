@@ -5,7 +5,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap');
 
-:root {
+:root,
+:root[data-theme="light"] {
   /* Color Palette — Light, minimal */
   --color-bg: #fafafa;
   --color-bg-elevated: #ffffff;
@@ -30,6 +31,17 @@
   --color-text-secondary: #52525b;
   --color-text-tertiary: #a1a1aa;
   --color-text-inverse: #fafafa;
+
+  --nav-bg: rgba(250, 250, 250, 0.9);
+  --toggle-bg: #f0f0f0;
+  --toggle-hover: #e5e5e5;
+  --badge-primary-border: #ddd6fe;
+  --badge-success-border: #bbf7d0;
+  --badge-danger-border: #fecaca;
+  --btn-secondary-hover-border: #d4d4d8;
+  --btn-danger-hover: #fee2e2;
+  --dropzone-hover-border: #a1a1aa;
+  --icon-busy-border: #ddd6fe;
 
   /* Typography */
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -81,6 +93,43 @@
   /* Layout */
   --max-width: 960px;
   --nav-height: 56px;
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0a0a0a;
+  --color-bg-elevated: #141414;
+  --color-bg-card: #171717;
+  --color-bg-hover: #1f1f1f;
+  --color-bg-muted: #1c1c1c;
+  --color-border: #262626;
+  --color-border-subtle: #1f1f1f;
+
+  --color-primary: #fafafa;
+  --color-primary-hover: #e5e5e5;
+  --color-accent: #8b5cf6;
+  --color-accent-soft: rgba(139, 92, 246, 0.12);
+  --color-success: #22c55e;
+  --color-success-soft: rgba(34, 197, 94, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-soft: rgba(245, 158, 11, 0.1);
+  --color-danger: #ef4444;
+  --color-danger-soft: rgba(239, 68, 68, 0.1);
+
+  --color-text: #fafafa;
+  --color-text-secondary: #a1a1aa;
+  --color-text-tertiary: #52525b;
+  --color-text-inverse: #09090b;
+
+  --nav-bg: rgba(10, 10, 10, 0.9);
+  --toggle-bg: #1c1c1c;
+  --toggle-hover: #262626;
+  --badge-primary-border: rgba(139, 92, 246, 0.25);
+  --badge-success-border: rgba(34, 197, 94, 0.2);
+  --badge-danger-border: rgba(239, 68, 68, 0.25);
+  --btn-secondary-hover-border: #404040;
+  --btn-danger-hover: rgba(239, 68, 68, 0.15);
+  --dropzone-hover-border: #52525b;
+  --icon-busy-border: rgba(139, 92, 246, 0.25);
 }
 
 /* --- Base Reset --- */
@@ -201,18 +250,18 @@ a:hover {
 
 .btn-secondary:not(:disabled):hover {
   background: var(--color-bg-hover);
-  border-color: #d4d4d8;
+  border-color: var(--btn-secondary-hover-border);
 }
 
 /* Danger */
 .btn-danger {
   background: var(--color-danger-soft);
   color: var(--color-danger);
-  border-color: #fecaca;
+  border-color: var(--badge-danger-border);
 }
 
 .btn-danger:not(:disabled):hover {
-  background: #fee2e2;
+  background: var(--btn-danger-hover);
 }
 
 /* Ghost */
@@ -263,19 +312,19 @@ a:hover {
 .badge-primary {
   background: var(--color-accent-soft);
   color: var(--color-accent);
-  border: 1px solid #ddd6fe;
+  border: 1px solid var(--badge-primary-border);
 }
 
 .badge-success {
   background: var(--color-success-soft);
   color: var(--color-success);
-  border: 1px solid #bbf7d0;
+  border: 1px solid var(--badge-success-border);
 }
 
 .badge-danger {
   background: var(--color-danger-soft);
   color: var(--color-danger);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--badge-danger-border);
 }
 
 /* --- Divider --- */
@@ -442,7 +491,7 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(250, 250, 250, 0.9);
+  background: var(--nav-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border-subtle);
@@ -675,7 +724,7 @@ a:hover {
 .recorder-icon--busy {
   color: var(--color-accent);
   background: var(--color-accent-soft);
-  border-color: #ddd6fe;
+  border-color: var(--icon-busy-border);
 }
 
 /* Recording active */
@@ -735,7 +784,7 @@ a:hover {
   gap: var(--space-2);
   padding: var(--space-3);
   background: var(--color-danger-soft);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--badge-danger-border);
   border-radius: var(--radius-md);
   font-size: var(--text-xs);
   color: var(--color-danger);
@@ -766,7 +815,7 @@ a:hover {
 }
 
 .drop-zone:hover {
-  border-color: #a1a1aa;
+  border-color: var(--dropzone-hover-border);
   background: var(--color-bg-hover);
 }
 
@@ -823,7 +872,7 @@ a:hover {
 .drop-zone-icon--active {
   color: var(--color-accent);
   background: var(--color-accent-soft);
-  border-color: #ddd6fe;
+  border-color: var(--icon-busy-border);
 }
 
 .drop-zone-label {
@@ -856,7 +905,7 @@ a:hover {
   gap: var(--space-2);
   padding: var(--space-3);
   background: var(--color-danger-soft);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--badge-danger-border);
   border-radius: var(--radius-md);
   font-size: var(--text-xs);
   color: var(--color-danger);
@@ -1061,7 +1110,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   background: var(--color-danger-soft);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--badge-danger-border);
   border-radius: var(--radius-lg);
   color: var(--color-danger);
 }
@@ -1255,6 +1304,62 @@ a:hover {
   display: flex;
   justify-content: center;
   opacity: 0.5;
+}
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: var(--toggle-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--toggle-hover);
+  color: var(--color-text);
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+  display: none;
+}
+
+:root .theme-toggle .icon-sun,
+:root[data-theme="light"] .theme-toggle .icon-sun {
+  display: none;
+}
+
+:root .theme-toggle .icon-moon,
+:root[data-theme="light"] .theme-toggle .icon-moon {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-sun {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-moon {
+  display: none;
 }
 
 /* ============================================================
