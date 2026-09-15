@@ -37,7 +37,8 @@ export default function App() {
   const [theme, setTheme] = useState(getInitialTheme);
   const [removedWords, setRemovedWords] = useState(() => new Set());
   const [historyEntries, setHistoryEntries] = useState(loadHistory);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [loadingStage, setLoadingStage] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -117,14 +118,19 @@ export default function App() {
   const handleAnalyse = useCallback(async () => {
     if (!state.audioBlob) return;
     patch({ status: APP_STATUS.ANALYZING, error: null });
-    setUploadProgress(0);
+    setLoadingStage(0);
+    setLoadingProgress(0);
 
     try {
       const result = await analyzeAudio(
         state.audioBlob,
         state.fileName ?? 'recording',
-        (pct) => setUploadProgress(pct)
+        (pct) => setLoadingProgress(pct * 0.25)
       );
+
+      setLoadingStage(1);
+      setLoadingProgress(60);
+      await new Promise((r) => setTimeout(r, 400));
 
       if (!result.topics?.length) {
         patch({
@@ -135,13 +141,20 @@ export default function App() {
         return;
       }
 
+      setLoadingStage(2);
+      setLoadingProgress(85);
+      await new Promise((r) => setTimeout(r, 300));
+
+      setLoadingStage(3);
+      setLoadingProgress(100);
+      await new Promise((r) => setTimeout(r, 200));
+
       patch({
         status:     APP_STATUS.SUCCESS,
         transcript: result.transcript,
         topics:     result.topics,
       });
 
-      // Save to history
       saveAnalysis({
         fileName:   state.fileName ?? 'recording',
         topics:     result.topics,
@@ -242,7 +255,7 @@ export default function App() {
           )}
 
           {isAnalyzing && (
-            <LoadingState uploadProgress={uploadProgress} />
+            <LoadingState progress={loadingProgress} stage={loadingStage} />
           )}
 
           {showPreview && (

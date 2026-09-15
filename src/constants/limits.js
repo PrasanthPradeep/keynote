@@ -47,6 +47,14 @@ export const MAX_SIZE_DISPLAY = '25 MB';
 /** Max duration formatted for display */
 export const MAX_DURATION_DISPLAY = '10 minutes';
 
+/** Loading stages for progress bar */
+export const STAGES = [
+  'Uploading audio',
+  'Analysing speech',
+  'Finding key topics',
+  'Building word cloud',
+];
+
 /**
  * Application status states.
  * Represents every valid state the app can be in.
