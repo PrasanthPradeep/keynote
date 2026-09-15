@@ -32,14 +32,10 @@ export function analyzeAudio(audioBlob, fileName = 'recording', onUploadProgress
     });
 
     xhr.addEventListener('load', () => {
-      console.log('[api.js] XHR load — status:', xhr.status);
-      console.log('[api.js] responseText (first 500):', xhr.responseText?.slice(0, 500));
-
       let data;
       try {
         data = JSON.parse(xhr.responseText);
-      } catch (e) {
-        console.error('[api.js] JSON parse failed:', e);
+      } catch {
         const err = new Error('Failed to parse response');
         err.userMessage =
           "We received an unexpected response. Please try again in a moment.";
@@ -48,7 +44,6 @@ export function analyzeAudio(audioBlob, fileName = 'recording', onUploadProgress
       }
 
       if (xhr.status < 200 || xhr.status >= 300) {
-        console.warn('[api.js] Non-OK status:', xhr.status, 'data:', data);
         const err = new Error(data?.error ?? `HTTP ${xhr.status}`);
         err.userMessage = data?.userMessage ?? translateHttpError(xhr.status);
         reject(err);
@@ -56,7 +51,6 @@ export function analyzeAudio(audioBlob, fileName = 'recording', onUploadProgress
       }
 
       if (!data.topics || !Array.isArray(data.topics)) {
-        console.warn('[api.js] Missing topics array:', data);
         const err = new Error('Invalid API response: missing topics');
         err.userMessage =
           "The analysis completed but returned unexpected data. Please try again.";
@@ -64,7 +58,6 @@ export function analyzeAudio(audioBlob, fileName = 'recording', onUploadProgress
         return;
       }
 
-      console.log('[api.js] Success — topics:', data.topics.length);
       resolve({
         transcript: data.transcript ?? '',
         topics:     data.topics,
@@ -72,7 +65,6 @@ export function analyzeAudio(audioBlob, fileName = 'recording', onUploadProgress
     });
 
     xhr.addEventListener('error', () => {
-      console.error('[api.js] XHR error event — status:', xhr.status, 'readyState:', xhr.readyState);
       const err = new Error('Network request failed');
       err.userMessage =
         "We couldn't reach the analysis service. Check your connection and try again.";
