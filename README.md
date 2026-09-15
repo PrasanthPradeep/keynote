@@ -50,11 +50,11 @@ npm install
 cp .dev.vars.example .dev.vars
 # Open .dev.vars and enter your GEMINI_API_KEY
 
-# 4. Start local development server
-npm run dev
+# 4. Start local development server (Vite + Cloudflare Worker)
+npm run dev:all
 ```
 
-The application will be accessible at `http://localhost:5173`.
+The application will be accessible at `http://localhost:5173`. This starts both the Vite dev server and the Cloudflare Worker API proxy concurrently.
 
 ---
 
