@@ -12,7 +12,7 @@ Key accomplishments:
 - Live microphone recording with real-time timer and auto-stop limit.
 - Support for 7 major audio formats (`MP3`, `WAV`, `M4A`, `AAC`, `OGG`, `WEBM`, `FLAC`).
 - Pre-flight audio validation for file size (≤ 25 MB) and duration (≤ 10 minutes).
-- Serverless Cloudflare Worker API proxy (`worker/index.js`) interfacing with **Gemini 1.5 Flash**.
+- Serverless Cloudflare Worker API proxy (`worker/index.js`) interfacing with **Gemini Flash** models with automatic fallback.
 - D3-cloud interactive canvas visualizer with responsive resizing and high-resolution PNG export.
 - Full transcript viewer with instant clipboard copy.
 
@@ -144,9 +144,9 @@ To obtain a Gemini API key:
 
 - **Unified Worker Architecture**: Uses Cloudflare Workers with asset binding to serve both static React SPA assets and the `/api/analyze` proxy route within a single application deployment.
 - **Serverless API Proxy**: Cloudflare Worker proxies requests to Gemini REST API to ensure `GEMINI_API_KEY` is never leaked to client bundles or git commits.
-- **Semantic Prompting vs. Raw Word Frequency**: Uses Gemini 1.5 Flash to perform natural language understanding, entity extraction, and topic weighting rather than naive word splitting/frequency counting.
+- **Semantic Prompting vs. Raw Word Frequency**: Uses Gemini Flash models to perform natural language understanding, entity extraction, and topic weighting rather than naive word splitting/frequency counting.
 - **Unified Pipeline Architecture**: Uploaded files and recorded audio streams are normalized into a unified `AudioAsset` structure before validation and analysis.
-- **Libraries Used**: `react`, `react-dom`, `d3`, `d3-cloud`, `vite`, `wrangler`.
+- **Libraries Used**: `react`, `react-dom`, `d3`, `d3-cloud` (runtime); `vite`, `wrangler` (dev tooling).
 - **AI Assistance**: Development performed in pair-programming collaboration with AI agentic coding tools.
 
 ---
