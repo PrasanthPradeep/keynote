@@ -2,6 +2,8 @@
 
 A browser-based tool for analysing mentoring-session audio recordings and generating an interactive, topic-focused word cloud powered by Gemini AI.
 
+![Keynote demo](public/keynote_app.gif)
+
 ---
 
 ## 1. What We Built
